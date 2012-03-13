@@ -1,4 +1,3 @@
-import operator
 import csv
 
 from nose.plugins.base import Plugin
@@ -9,16 +8,6 @@ class TestTimer(Plugin):
 
     name = 'test-timer'
     score = 1
-
-    def _timeTaken(self):
-        if hasattr(self, '_timer'):
-            taken = time() - self._timer
-        else:
-            # test died before it ran (probably error in setup())
-            # or success/failure added before test started probably
-            # due to custom TestResult munging
-            taken = 0.0
-        return taken
 
     def options(self, parser, env):
         """Sets additional command line options."""
@@ -31,7 +20,7 @@ class TestTimer(Plugin):
         parser.add_option('--test-timer-threshold',
                           type='float',
                           dest='threshold',
-                          default=None,
+                          default=0,
                           help='Only capture tests that take longer than the specified number of seconds FLOAT')
 
     def configure(self, options, config):
@@ -39,37 +28,52 @@ class TestTimer(Plugin):
         super(TestTimer, self).configure(options, config)
         self.config = config
         self.options = options
-        self._timed_tests = {}
+        self.tests = {}
 
     def startTest(self, test):
         """Initializes a timer before starting a test."""
-        self._timer = time()
+        self.tests[test.address()] = [time.time(), time.time()]
 
     def stopTest(self, test):
-        self._timed_tests[test.address()] = self._timeTaken()
+        self.tests[test.address()][1] = time.time()
+
+    def _fully_qualified_test_address(self, test):
+        path, module, rest = test
+        name = None
+        if module:
+            name = module
+            if rest:
+                name = '%s:%s' % (module, rest)
+        return name
+
+    def _generate_report(self):
+        test_deltas = []
+        for test, times in self.tests:
+            delta = times[1] - times[0]
+            test_deltas.append([delta,
+                self._fully_qualified_test_address(test)])
+        test_deltas_sorted = sorted(test_deltas)
+
+        reports = []
+        for delta, test in test_deltas_sorted:
+            if delta <= self.options.threshold:
+                continue
+            report = ['%0.4f' % delta, test]
+            reports.append(report)
+        return reports
+
+    def _write_csv(self, reports):
+        if self.options.output_csv is not None:
+            with open(self.options.output_csv, 'wb') as f:
+                writer = csv.writer(f)
+                writer.writerows(reports)
 
     def report(self, stream):
         """Report the test times"""
         if not self.enabled:
             return
-        build_report = self.options.output_csv is not None
-        d = sorted(self._timed_tests.iteritems(), key=operator.itemgetter(1))
-        reports = []
-        for test, time_taken in d:
-            if time_taken < self.options.threshold:
-                continue
-            file, module, rest = test
-            test_name = 'unknown test'
-            if module:
-                test_name = module
-                if rest:
-                    test_name = '%s:%s' % (module, rest)
-            if build_report:
-                reports.append(['%0.4f' % time_taken, test_name])
-            stream.writeln("%0.4f - %s" % (time_taken, test_name))
-        if build_report:
-            with open(self.options.output_csv, 'wb') as f:
-                writer = csv.writer(f)
-                stream.writeln('writerows')
-                writer.writerows(reports)
+        reports = self.generate_report()
+        self._write_csv(reports)
+        for report in reports:
+            stream.writeln(' - '.join(report))
 
