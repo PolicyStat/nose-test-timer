@@ -10,10 +10,10 @@ setup(
     install_requires=['nose'],
     license = 'BSD',
     keywords = 'test unittest nose nosetests plugin debug profile',
-    py_modules = ['testtimer'],
+    py_modules = ['nose_test_timer'],
     entry_points = {
         'nose.plugins.0.10': [
-            'testtimer = testtimer:TestTimer',
+            'nose_test_timer = testtimer:TestTimer',
         ],
     },
 )
