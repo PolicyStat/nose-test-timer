@@ -1,7 +1,7 @@
 import csv
+import time
 
 from nose.plugins.base import Plugin
-from time import time
 
 class TestTimer(Plugin):
     "This plugin provides test timings"
