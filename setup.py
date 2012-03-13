@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='ipdbplugin',
+    name='nose_test_timer',
     version='1',
     url='http://github.com/PolicyStat/nose-test-timer',
     author='Kyle Gibson',
