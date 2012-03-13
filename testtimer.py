@@ -48,15 +48,15 @@ class TestTimer(Plugin):
 
     def _generate_report(self):
         test_deltas = []
-        for test, times in self.tests:
+        for address, times in self.tests.iteritems():
             delta = times[1] - times[0]
             test_deltas.append([delta,
-                self._fully_qualified_test_address(test)])
+                self._fully_qualified_test_address(address)])
         test_deltas_sorted = sorted(test_deltas)
 
         reports = []
         for delta, test in test_deltas_sorted:
-            if delta <= self.options.threshold:
+            if delta <= self.options.get('threshold', 0):
                 continue
             report = ['%0.4f' % delta, test]
             reports.append(report)

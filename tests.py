@@ -27,3 +27,36 @@ class TestTimerTest(unittest.TestCase):
         actual = self.timer.tests.get(mock.sentinel.address, None)
         expected = [mock.sentinel.time_start, mock.sentinel.time_stop]
         self.assertEqual(actual, expected)
+
+    def test_fully_qualified_test_address_nothing(self):
+        address = self.timer._fully_qualified_test_address(
+                (None, None, None))
+        self.assertEqual(address, None)
+
+    def test_fully_qualified_test_address_module(self):
+        address = self.timer._fully_qualified_test_address(
+                (None, 'module', None))
+        self.assertEqual(address, 'module')
+
+    def test_fully_qualified_test_address_module_and_name(self):
+        address = self.timer._fully_qualified_test_address(
+                (None, 'module', 'foo'))
+        self.assertEqual(address, 'module:foo')
+
+    def test_generate_report_is_empty(self):
+        reports = self.timer._generate_report()
+        self.assertEqual(reports, [])
+
+    def test_generate_report_returns_reports(self):
+        self.test.address.return_value = (None, 'foo', 'bar')
+        with mock.patch('time.time', return_value=1):
+            self.timer.startTest(self.test)
+        with mock.patch('time.time', return_value=10):
+            self.timer.stopTest(self.test)
+        self.timer._fully_qualified_test_address = mock.Mock(
+                return_value=mock.sentinel.address)
+        expected = [['%0.4f' % 9, mock.sentinel.address]]
+        actual = self.timer._generate_report()
+        self.assertEqual(actual, expected)
+
+
