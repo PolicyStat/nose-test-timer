@@ -13,7 +13,7 @@ setup(
     py_modules = ['nose_test_timer'],
     entry_points = {
         'nose.plugins.0.10': [
-            'nose_test_timer = testtimer:TestTimer',
+            'nose_test_timer = nose_test_timer:TestTimer',
         ],
     },
 )

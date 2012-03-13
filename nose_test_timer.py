@@ -56,7 +56,7 @@ class TestTimer(Plugin):
 
         reports = []
         for delta, test in test_deltas_sorted:
-            if delta <= self.options.get('threshold', 0):
+            if delta <= self.options.threshold:
                 continue
             report = ['%0.4f' % delta, test]
             reports.append(report)

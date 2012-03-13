@@ -9,8 +9,7 @@ class TestTimerTest(unittest.TestCase):
             address=mock.Mock(return_value=mock.sentinel.address)
         )
         self.timer = TestTimer()
-        self.timer.configure({}, {})
-
+        self.timer.configure(mock.Mock(threshold=0), {})
 
     @mock.patch('time.time', return_value=mock.sentinel.time)
     def test_startTest(self, time_mock):
