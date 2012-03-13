@@ -1,6 +1,6 @@
 import unittest
 import mock
-from testtimer import TestTimer
+from nose_test_timer import TestTimer
 
 class TestTimerTest(unittest.TestCase):
 
@@ -59,4 +59,22 @@ class TestTimerTest(unittest.TestCase):
         actual = self.timer._generate_report()
         self.assertEqual(actual, expected)
 
+    def test_report_should_generate_a_report(self):
+        with mock.patch.object(self.timer, '_generate_report',
+                mocksignature=True) as generate_report:
+            with mock.patch.object(self.timer, '_write_csv',
+                    mocksignature=True):
+                generate_report.return_value = []
+                self.timer.enabled = True
+                self.timer.report(None)
+            self.assertTrue(generate_report.called)
+
+    def test_report_should_write_csv_report(self):
+        with mock.patch.object(self.timer, '_generate_report',
+                mocksignature=True):
+            with mock.patch.object(self.timer, '_write_csv',
+                    mocksignature=True) as write_csv:
+                self.timer.enabled = True
+                self.timer.report(None)
+                self.assertTrue(write_csv.called)
 

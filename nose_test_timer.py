@@ -72,7 +72,7 @@ class TestTimer(Plugin):
         """Report the test times"""
         if not self.enabled:
             return
-        reports = self.generate_report()
+        reports = self._generate_report()
         self._write_csv(reports)
         for report in reports:
             stream.writeln(' - '.join(report))
