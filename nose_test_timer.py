@@ -67,13 +67,15 @@ class TestTimer(Plugin):
             with open(self.options.output_csv, 'wb') as f:
                 writer = csv.writer(f)
                 writer.writerows(reports)
+            return True
+        return False
 
     def report(self, stream):
         """Report the test times"""
         if not self.enabled:
             return
         reports = self._generate_report()
-        self._write_csv(reports)
-        for report in reports:
-            stream.writeln(' - '.join(report))
+        if not self._write_csv(reports):
+            for report in reports:
+                stream.writeln(' - '.join(report))
 
